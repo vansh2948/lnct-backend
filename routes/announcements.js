@@ -1,7 +1,7 @@
 // routes/announcements.js
 const express = require('express');
 const router = express.Router();
-const Announcement = require('../models/Announcement');
+const Announcement = require('../models1/Announcement');
 
 // POST: Add new announcement
 router.post('/', async (req, res) => {
