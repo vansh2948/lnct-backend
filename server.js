@@ -11,6 +11,7 @@ const Contact = require('./models/contact');
 
 const app = express();
 
+const cors = require("cors");
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
