@@ -1,19 +1,13 @@
 // routes/announcements.js
-
 const express = require('express');
 const router = express.Router();
-const Announcement = require('../models1/announcement'); // ✅ updated path
+const Announcement = require('../models/Announcement');
 
 // POST: Add new announcement
 router.post('/', async (req, res) => {
   const { text } = req.body;
-
-  if (!text || text.trim() === '') {
-    return res.status(400).json({ error: 'Announcement text is required' });
-  }
-
   try {
-    const newAnnouncement = new Announcement({ text: text.trim() });
+    const newAnnouncement = new Announcement({ text });
     await newAnnouncement.save();
     res.status(201).json({ message: 'Announcement added successfully' });
   } catch (err) {
