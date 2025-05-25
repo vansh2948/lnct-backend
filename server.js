@@ -1,39 +1,46 @@
 require('dotenv').config();
 console.log("Loaded MONGO_URI from .env:", process.env.MONGO_URI);
 
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-require('dotenv').config();
-
-const Contact = require('./models/contact');
+const express = require("express");
+const cors = require("cors"); // ✅ Only declared once
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 
 const app = express();
 
-const cors = require("cors");
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
-console.log("Mongo URI:", process.env.MONGO_URI)
-mongoose.connect(process.env.MONGO_URI, {
+
+// Database connection
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/contactForm", {
   useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("✅ MongoDB connected"))
-.catch(err => console.error(err));
+  useUnifiedTopology: true,
+});
 
+// Define schema
+const contactSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  message: String,
+});
 
-app.post('/contact', async (req, res) => {
-  const { name, email, message } = req.body;
+const Contact = mongoose.model("Contact", contactSchema);
+
+// Routes
+app.post("/contact", async (req, res) => {
   try {
-    const contact = new Contact({ name, email, message });
+    const contact = new Contact(req.body);
     await contact.save();
-    res.status(200).json({ message: 'Contact saved successfully' });
+    res.status(200).json({ message: "Form submitted successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to save contact' });
+    console.error("Error saving contact:", error);
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
