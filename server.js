@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-const Contact = require('./models/contact');
+// UPDATED PATHS to match models1 folder
+const Contact = require('./models1/contact');
 const announcementRoutes = require('./routes/announcements');
 
 const app = express();
@@ -13,19 +14,19 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Serve static files from the "public" directory
+// Serve static files (like admin.html)
 app.use(express.static('public'));
 
 // MongoDB Connection
 console.log("Loaded MONGO_URI from .env:", process.env.MONGO_URI);
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 })
 .then(() => console.log("✅ MongoDB connected"))
 .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Contact Form Endpoint
+// Contact endpoint
 app.post('/contact', async (req, res) => {
   const { name, email, message } = req.body;
   try {
@@ -37,9 +38,9 @@ app.post('/contact', async (req, res) => {
   }
 });
 
-// Announcements Route
+// Announcements endpoint
 app.use('/announcements', announcementRoutes);
 
-// Start Server
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
