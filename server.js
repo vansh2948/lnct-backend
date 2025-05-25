@@ -1,24 +1,35 @@
 require('dotenv').config();
 console.log("Loaded MONGO_URI from .env:", process.env.MONGO_URI);
 
+ 
+
 const express = require("express");
-const cors = require("cors"); // ✅ Only declared once
+const cors = require("cors");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
+require("dotenv").config();
 
 const app = express();
+const PORT = process.env.PORT || 10000;
 
-// Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/contactForm", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// Use the MongoDB URI from .env
+const mongoURI = process.env.MONGO_URI;
 
-// Define schema
+if (!mongoURI) {
+  console.error("❌ MONGO_URI is not defined in .env");
+  process.exit(1);
+}
+
+mongoose
+  .connect(mongoURI)
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch((err) => {
+    console.error("❌ Error connecting to MongoDB Atlas:", err);
+    process.exit(1);
+  });
+
 const contactSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -27,20 +38,18 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model("Contact", contactSchema);
 
-// Routes
 app.post("/contact", async (req, res) => {
   try {
-    const contact = new Contact(req.body);
-    await contact.save();
+    const { name, email, message } = req.body;
+    const newContact = new Contact({ name, email, message });
+    await newContact.save();
     res.status(200).json({ message: "Form submitted successfully" });
-  } catch (error) {
-    console.error("Error saving contact:", error);
-    res.status(500).json({ error: "Something went wrong" });
+  } catch (err) {
+    console.error("❌ Error saving contact:", err);
+    res.status(500).json({ message: "Failed to submit form" });
   }
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
